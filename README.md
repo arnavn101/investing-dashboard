@@ -1,0 +1,21 @@
+I designed a stock analysis platform, composed of:
+
+    1. Stock Data Hub microservice which consolidates real-time stock data from various sources. It periodically pulls latest stock quotes using the Alpaca API. This serves as a producer to relay stock data to other microservices.
+
+    2. Stock Analytics microservice which computes stock metrics with data from Stock Data Hub microservice and performs technical analysis using performance indicators. It utilizes analysis algorithms such as MACD, RSA, and Bollinger Bands to provide meaningful insights into stock trends.
+
+    3. Investing Insights microservice which generates a buy-sell signal (recommendation) based on trends of the stock data over time. It produces actionable insights for an informed decision on stock trading through data analyses from Stock Analytics microservice.
+
+The frontend includes components for displaying personalized investment recommendation on a pre-selected list of stocks picked by Stock Data Hub. It has an interactive graph component, being useful for visualizing buy-sell signals at a given timeframe. It also gives functionality to add stocks, making the necessary API calls to fetch recommendations for any input stock.
+
+I chose the field of investing and stock trading as it is a dynamic use-case and requires integration of several services to produce value for users. I am interested in financial markets and I think this is a good opportunity to build an intricate application that serves my interests. Further, I believe the financial aspect adds a layer of complexity and real-world relevance to the project.
+
+The application is interesting as it provides a platform for users to meet their stock-related needs, with data available for advanced users to tinker with and specialized tips for new investors to be acclimated to. Therefore, investors, both beginners and experienced, could use the application to make informed decisions, optimize their portfolios, and receive tailored advice.
+
+It needs to scale in order to meet the dynamic and high-frequency demands of stock data analytics. As more users utilize the platform, the Stock Data Hub microservice must efficiently handle the increased demand for updated real-time data. The Stock Analytics microservice needs to scale to handle complex computations and analytics for a growing user base. And, as more investors use the application, the Investing Insights microservice should scale to deliver personalized tips and recommendations to a larger audience. Scalability is crucial in order to maintain consistent performance and response times as the number of users and data volume increases.
+
+The application is primarily based on 3 micro services with 1 frontend facing application. Backend services are based on Express.js and scaled through PM2 with multiple instances. The frontend is based on Svelte and has 1 instance through PM2. All services are configured through Docker and are orchestrated through docker-compose. Each service through docker-compose, has a health-check which constantly monitors for functionality and serves as an indicator of performance under heavy load. Based on Postgresql, there are several databases for stock data, analyses, and insights. Each database contains one table per stock, with entries for every timestamp of collected data. 
+
+With respect to environment variables, the stock data hub service leverages Alpaca to fetch latest market data so it contains a key and secret used for authentication. In addition, it contains the number of stocks to be randomly selected for data collection at startup. All the services have a variable to denote the frequency at which they would pull data from other services and update the database. Lastly, the services also contain the database name where they would store data in Postgresql. These variables are stored in local .env file at each service directory.
+
+Therefore, in order to address challenges in the financial domain, this application combines real-time data consolidation, advanced analytics, and personalized insights. With an emphasis on scalability, it has a potential to cater towards a wide array of user and be consistently responsive.

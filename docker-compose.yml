@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+  stock-db:
+    image: postgres:13
+    ports:
+      - '5432:5432'
+    volumes:
+      - stock-db:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  event-bus:
+    build: event-bus
+    ports:
+      - '5005:5005'
+    depends_on:
+      stock-db:
+        condition: service_healthy
+    links:
+      - stock-db
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5005"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+  stock-data-hub:
+    build: stock-data-hub
+    ports:
+      - '3000:3000'
+    depends_on:
+      event-bus:
+        condition: service_healthy
+    links:
+      - event-bus
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+  stock-analytics:
+    build: stock-analytics
+    ports:
+      - '4000:4000'
+    depends_on:
+      stock-data-hub:
+        condition: service_healthy
+    links:
+      - stock-data-hub
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/api"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+  investing-insights:
+    build: investing-insights
+    ports:
+      - '5000:5000'
+    depends_on:
+      stock-analytics:
+        condition: service_healthy
+    links:
+      - stock-analytics
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+  investing-app:
+    build: investing-app
+    ports:
+      - '5173:5173'
+    depends_on:
+      investing-insights:
+        condition: service_healthy
+    links:
+      - investing-insights
+
+volumes:
+  stock-db:
